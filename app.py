@@ -92,7 +92,7 @@ def upload_image():
 
     try:
 
-        supabase.storage \
+        result = supabase.storage \
             .from_("images") \
             .upload(
                 file_path,
@@ -102,6 +102,12 @@ def upload_image():
                     "upsert": "true"
                 }
             )
+
+
+        print(
+            "Supabase upload result:",
+            result
+        )
 
 
         print(
@@ -132,7 +138,6 @@ def upload_image():
             "error": str(e)
 
         }), 500
-
 
 # -------------------------------
 # IMAGE DOWNLOAD
