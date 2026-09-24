@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from supabase import create_client
+import requests
 import os
 import json
 
