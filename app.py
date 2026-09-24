@@ -66,7 +66,6 @@ def upload_image():
     data = request.json
 
     if not data:
-
         return jsonify({
             "error": "No image data received"
         }), 400
@@ -75,14 +74,12 @@ def upload_image():
     name = data.get("name")
 
     if not name:
-
         return jsonify({
             "error": "Missing image name"
         }), 400
 
 
     file_path = f"{name}.json"
-
 
     json_data = json.dumps(
         data,
@@ -103,40 +100,50 @@ def upload_image():
                 }
             )
 
-
-        print(
-            "Supabase upload result:",
-            result
-        )
-
-
-        print(
-            "Image uploaded:",
-            file_path
-        )
-
+        print("Supabase result:", result)
 
         return jsonify({
-
             "success": True,
-
             "name": name
-
         })
 
 
     except Exception as e:
 
-        print(
-            "Image upload error:",
-            e
-        )
+        print("IMAGE UPLOAD FAILED")
+        print("Error:", repr(e))
+        print("Type:", type(e))
+
+        # Try to expose the original HTTP error
+        original = getattr(e, "__context__", None)
+
+        if original:
+            print("Original error:", repr(original))
+
+            response = getattr(original, "response", None)
+
+            if response:
+                print("Original response:", response)
+
+                try:
+                    print(
+                        "Response body:",
+                        response.text
+                    )
+                except Exception:
+                    pass
+
+                try:
+                    print(
+                        "Response status:",
+                        response.status_code
+                    )
+                except Exception:
+                    pass
 
 
         return jsonify({
-
             "error": str(e)
-
         }), 500
 
 # -------------------------------
