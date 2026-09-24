@@ -296,71 +296,72 @@ def upload_image():
 @app.get("/image/<name>")
 def get_image(name):
 
-    file_path = f"images/{name}.json"
+    print("================================")
+    print("IMAGE REQUEST")
+    print("Requested name:", repr(name))
 
+    file_path = f"Images/{name}.json"
+
+    print("GitHub path:", file_path)
 
     try:
 
-        url = (
-            f"{GITHUB_API}/{file_path}"
-        )
+        url = f"{GITHUB_API}/{file_path}"
 
+        print("GitHub URL:", url)
 
         response = requests.get(
-
             url,
-
             headers=github_headers(),
-
             timeout=30
         )
 
-
         print(
-            "GitHub download status:",
+            "GitHub status:",
             response.status_code
         )
 
+        print(
+            "GitHub response:",
+            response.text[:500]
+        )
 
         if response.status_code != 200:
 
-            print(
-                "GitHub download error:",
-                response.text
-            )
-
             return jsonify({
-
-                "error":
-                    "Image not found"
-
+                "error": "Image not found",
+                "requested": name,
+                "github_path": file_path,
+                "github_status": response.status_code,
+                "github_response": response.text
             }), 404
 
 
-        github_data = response.json()
+        github_data =
+            response.json()
 
 
-        # GitHub returns the file content as Base64
-        encoded_content = github_data.get(
-            "content",
-            ""
-        )
+        encoded_content =
+            github_data.get("content", "")
 
 
-        # Remove newlines GitHub may include
-        encoded_content = (
-            encoded_content
-            .replace("\n", "")
-        )
+        encoded_content =
+            encoded_content.replace("\n", "")
 
 
-        json_data = base64.b64decode(
-            encoded_content
-        ).decode("utf-8")
+        json_data =
+            base64.b64decode(
+                encoded_content
+            ).decode("utf-8")
 
 
-        data = json.loads(
-            json_data
+        data =
+            json.loads(json_data)
+
+
+        print(
+            "Successfully downloaded:",
+            file_path
         )
 
 
@@ -370,14 +371,10 @@ def get_image(name):
     except Exception as e:
 
         print(
-            "Image download error:",
+            "IMAGE DOWNLOAD ERROR:",
             repr(e)
         )
 
-
         return jsonify({
-
-            "error":
-                "Image not found"
-
-        }), 404
+            "error": str(e)
+        }), 500
