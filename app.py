@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
 from supabase import create_client
 import requests
+from urllib.parse import quote
 import os
 import json
+
 
 app = Flask(__name__)
 
@@ -67,71 +69,134 @@ def upload_image():
     data = request.json
 
     if not data:
+
         return jsonify({
             "error": "No image data received"
         }), 400
 
+
     name = data.get("name")
 
     if not name:
+
         return jsonify({
             "error": "Missing image name"
         }), 400
 
+
     file_path = f"{name}.json"
+
 
     json_data = json.dumps(
         data,
         separators=(",", ":")
     ).encode("utf-8")
 
+
     try:
 
+        # Supabase Storage REST API
         url = (
             SUPABASE_URL
-            + "/storage/v1/object/images/"
-            + file_path
+            + "/storage/v1/object/"
+            + quote(
+                "images/" + file_path,
+                safe="/"
+            )
         )
 
+
         headers = {
-            "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
-            "apikey": SUPABASE_SERVICE_KEY,
-            "Content-Type": "application/json"
+
+            "Authorization":
+                f"Bearer {SUPABASE_SERVICE_KEY}",
+
+            "apikey":
+                SUPABASE_SERVICE_KEY,
+
+            "Content-Type":
+                "application/json"
         }
 
+
         response = requests.post(
+
             url,
+
             headers=headers,
+
             data=json_data,
+
             timeout=60
         )
 
-        print("Supabase status:", response.status_code)
-        print("Supabase response:", response.text)
+
+        print(
+            "Supabase URL:",
+            url
+        )
+
+        print(
+            "Supabase status:",
+            response.status_code
+        )
+
+        print(
+            "Supabase response:",
+            response.text
+        )
+
 
         if response.status_code >= 400:
 
             return jsonify({
-                "error": "Supabase upload failed",
-                "status": response.status_code,
-                "details": response.text
+
+                "error":
+                    "Supabase upload failed",
+
+                "status":
+                    response.status_code,
+
+                "details":
+                    response.text
+
             }), 500
 
-        print("Image uploaded:", file_path)
+
+        print(
+            "Image uploaded:",
+            file_path
+        )
+
 
         return jsonify({
+
             "success": True,
+
             "name": name
+
         })
+
 
     except Exception as e:
 
-        print("IMAGE UPLOAD FAILED")
-        print("Error:", repr(e))
+        print(
+            "IMAGE UPLOAD FAILED"
+        )
+
+        print(
+            "Error:",
+            repr(e)
+        )
+
 
         return jsonify({
-            "error": str(e)
+
+            "error":
+                str(e)
+
         }), 500
+
 
 # -------------------------------
 # IMAGE DOWNLOAD
@@ -145,9 +210,11 @@ def get_image(name):
 
     try:
 
-        response = supabase.storage \
-            .from_("images") \
+        response = (
+            supabase.storage
+            .from_("images")
             .download(file_path)
+        )
 
 
         data = json.loads(
@@ -168,6 +235,7 @@ def get_image(name):
 
         return jsonify({
 
-            "error": "Image not found"
+            "error":
+                "Image not found"
 
         }), 404
