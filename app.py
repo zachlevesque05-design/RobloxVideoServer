@@ -70,14 +70,12 @@ def upload_image():
             "error": "No image data received"
         }), 400
 
-
     name = data.get("name")
 
     if not name:
         return jsonify({
             "error": "Missing image name"
         }), 400
-
 
     file_path = f"{name}.json"
 
@@ -86,61 +84,49 @@ def upload_image():
         separators=(",", ":")
     ).encode("utf-8")
 
-
     try:
 
-        result = supabase.storage \
-            .from_("images") \
-            .upload(
-                file_path,
-                json_data,
-                {
-                    "content-type": "application/json",
-                    "upsert": "true"
-                }
-            )
+        url = (
+            SUPABASE_URL
+            + "/storage/v1/object/images/"
+            + file_path
+        )
 
-        print("Supabase result:", result)
+        headers = {
+            "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+            "apikey": SUPABASE_SERVICE_KEY,
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(
+            url,
+            headers=headers,
+            data=json_data,
+            timeout=60
+        )
+
+        print("Supabase status:", response.status_code)
+        print("Supabase response:", response.text)
+
+        if response.status_code >= 400:
+
+            return jsonify({
+                "error": "Supabase upload failed",
+                "status": response.status_code,
+                "details": response.text
+            }), 500
+
+        print("Image uploaded:", file_path)
 
         return jsonify({
             "success": True,
             "name": name
         })
 
-
     except Exception as e:
 
         print("IMAGE UPLOAD FAILED")
         print("Error:", repr(e))
-        print("Type:", type(e))
-
-        # Try to expose the original HTTP error
-        original = getattr(e, "__context__", None)
-
-        if original:
-            print("Original error:", repr(original))
-
-            response = getattr(original, "response", None)
-
-            if response:
-                print("Original response:", response)
-
-                try:
-                    print(
-                        "Response body:",
-                        response.text
-                    )
-                except Exception:
-                    pass
-
-                try:
-                    print(
-                        "Response status:",
-                        response.status_code
-                    )
-                except Exception:
-                    pass
-
 
         return jsonify({
             "error": str(e)
