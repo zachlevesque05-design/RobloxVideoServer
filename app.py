@@ -24,18 +24,10 @@ GITHUB_API = (
 
 
 def github_headers():
-
     return {
-
-        "Authorization":
-            f"Bearer {GITHUB_TOKEN}",
-
-        "Accept":
-            "application/vnd.github+json",
-
-        "X-GitHub-Api-Version":
-            "2022-11-28"
-
+        "Authorization": f"Bearer {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28"
     }
 
 
@@ -52,7 +44,6 @@ video = None
 
 @app.get("/")
 def home():
-
     return "Roblox video server is alive!"
 
 
@@ -65,8 +56,7 @@ def upload_video():
 
     global video
 
-    video =
-        request.json
+    video = request.json
 
     print("Video uploaded!")
 
@@ -77,10 +67,8 @@ def upload_video():
 def get_video():
 
     if video is None:
-
         return {
-            "error":
-                "No video uploaded yet"
+            "error": "No video uploaded yet"
         }
 
     return jsonify(video)
@@ -93,31 +81,19 @@ def get_video():
 @app.post("/image")
 def upload_image():
 
-    data =
-        request.json
-
+    data = request.json
 
     if not data:
-
         return jsonify({
-
-            "error":
-                "No image data received"
-
+            "error": "No image data received"
         }), 400
 
 
-    name =
-        data.get("name")
-
+    name = data.get("name")
 
     if not name:
-
         return jsonify({
-
-            "error":
-                "Missing image name"
-
+            "error": "Missing image name"
         }), 400
 
 
@@ -125,9 +101,7 @@ def upload_image():
     # GITHUB FILE PATH
     # ----------------------------------------------
 
-    file_path =
-        f"Images/{name}.json"
-
+    file_path = f"Images/{name}.json"
 
     print("================================")
     print("IMAGE UPLOAD")
@@ -139,43 +113,33 @@ def upload_image():
     # CONVERT JSON TO BASE64
     # ----------------------------------------------
 
-    json_data =
-        json.dumps(
-            data,
-            separators=(",", ":")
-        ).encode("utf-8")
+    json_data = json.dumps(
+        data,
+        separators=(",", ":")
+    ).encode("utf-8")
 
 
-    encoded_content =
-        base64.b64encode(
-            json_data
-        ).decode("utf-8")
+    encoded_content = base64.b64encode(
+        json_data
+    ).decode("utf-8")
 
 
     try:
 
-        headers =
-            github_headers()
+        headers = github_headers()
 
 
         # ------------------------------------------
         # CHECK IF FILE ALREADY EXISTS
         # ------------------------------------------
 
-        check_url =
-            f"{GITHUB_API}/{file_path}"
+        check_url = f"{GITHUB_API}/{file_path}"
 
-
-        check_response =
-            requests.get(
-
-                check_url,
-
-                headers=headers,
-
-                timeout=30
-
-            )
+        check_response = requests.get(
+            check_url,
+            headers=headers,
+            timeout=30
+        )
 
 
         print(
@@ -189,18 +153,13 @@ def upload_image():
 
         if check_response.status_code == 200:
 
-            existing_file =
-                check_response.json()
+            existing_file = check_response.json()
 
-
-            sha =
-                existing_file.get("sha")
-
+            sha = existing_file.get("sha")
 
             print(
                 "Existing image found."
             )
-
 
             print(
                 "Updating:",
@@ -214,7 +173,6 @@ def upload_image():
                 "Image does not exist yet."
             )
 
-
             print(
                 "Creating:",
                 file_path
@@ -227,11 +185,9 @@ def upload_image():
                 "GitHub check failed:"
             )
 
-
             print(
                 check_response.text
             )
-
 
             return jsonify({
 
@@ -251,18 +207,12 @@ def upload_image():
         # UPLOAD / UPDATE
         # ------------------------------------------
 
-        upload_url =
-            f"{GITHUB_API}/{file_path}"
+        upload_url = f"{GITHUB_API}/{file_path}"
 
 
         upload_data = {
-
-            "message":
-                f"Upload image {name}",
-
-            "content":
-                encoded_content
-
+            "message": f"Upload image {name}",
+            "content": encoded_content
         }
 
 
@@ -270,22 +220,15 @@ def upload_image():
 
         if sha:
 
-            upload_data["sha"] =
-                sha
+            upload_data["sha"] = sha
 
 
-        response =
-            requests.put(
-
-                upload_url,
-
-                headers=headers,
-
-                json=upload_data,
-
-                timeout=60
-
-            )
+        response = requests.put(
+            upload_url,
+            headers=headers,
+            json=upload_data,
+            timeout=60
+        )
 
 
         print(
@@ -300,10 +243,7 @@ def upload_image():
         )
 
 
-        if response.status_code not in (
-            200,
-            201
-        ):
+        if response.status_code not in (200, 201):
 
             return jsonify({
 
@@ -327,14 +267,11 @@ def upload_image():
 
         return jsonify({
 
-            "success":
-                True,
+            "success": True,
 
-            "name":
-                name,
+            "name": name,
 
-            "path":
-                file_path
+            "path": file_path
 
         })
 
@@ -345,7 +282,6 @@ def upload_image():
             "IMAGE UPLOAD FAILED"
         )
 
-
         print(
             "Error:",
             repr(e)
@@ -353,10 +289,7 @@ def upload_image():
 
 
         return jsonify({
-
-            "error":
-                str(e)
-
+            "error": str(e)
         }), 500
 
 
@@ -380,8 +313,7 @@ def get_image(name):
     # GITHUB PATH
     # ----------------------------------------------
 
-    file_path =
-        f"Images/{name}.json"
+    file_path = f"Images/{name}.json"
 
 
     print(
@@ -392,8 +324,7 @@ def get_image(name):
 
     try:
 
-        url =
-            f"{GITHUB_API}/{file_path}"
+        url = f"{GITHUB_API}/{file_path}"
 
 
         print(
@@ -406,17 +337,11 @@ def get_image(name):
         # DOWNLOAD FROM GITHUB
         # ------------------------------------------
 
-        response =
-            requests.get(
-
-                url,
-
-                headers=
-                    github_headers(),
-
-                timeout=30
-
-            )
+        response = requests.get(
+            url,
+            headers=github_headers(),
+            timeout=30
+        )
 
 
         print(
@@ -461,47 +386,42 @@ def get_image(name):
         # GET GITHUB JSON
         # ------------------------------------------
 
-        github_data =
-            response.json()
+        github_data = response.json()
 
 
-        encoded_content =
-            github_data.get(
-                "content",
-                ""
-            )
+        encoded_content = github_data.get(
+            "content",
+            ""
+        )
 
 
         # GitHub sometimes inserts
         # newlines into Base64
 
-        encoded_content =
-            encoded_content.replace(
-                "\n",
-                ""
-            )
+        encoded_content = encoded_content.replace(
+            "\n",
+            ""
+        )
 
 
         # ------------------------------------------
         # DECODE BASE64
         # ------------------------------------------
 
-        json_data =
-            base64.b64decode(
-                encoded_content
-            ).decode(
-                "utf-8"
-            )
+        json_data = base64.b64decode(
+            encoded_content
+        ).decode(
+            "utf-8"
+        )
 
 
         # ------------------------------------------
         # DECODE JSON
         # ------------------------------------------
 
-        data =
-            json.loads(
-                json_data
-            )
+        data = json.loads(
+            json_data
+        )
 
 
         print(
@@ -524,17 +444,13 @@ def get_image(name):
 
         print(
             "Palette:",
-            len(
-                data.get("p", [])
-            )
+            len(data.get("p", []))
         )
 
 
         print(
             "Rectangles:",
-            len(
-                data.get("r", [])
-            )
+            len(data.get("r", []))
         )
 
 
@@ -551,7 +467,6 @@ def get_image(name):
         print(
             "IMAGE DOWNLOAD ERROR:"
         )
-
 
         print(
             repr(e)
@@ -577,11 +492,10 @@ if __name__ == "__main__":
 
     app.run(
         host="0.0.0.0",
-        port=
-            int(
-                os.environ.get(
-                    "PORT",
-                    5000
-                )
+        port=int(
+            os.environ.get(
+                "PORT",
+                5000
             )
+        )
     )
