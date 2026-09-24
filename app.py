@@ -93,7 +93,7 @@ def upload_image():
         }), 400
 
 
-    file_path = f"images/{name}.json"
+    file_path = f"Images/{name}.json"
 
 
     # Convert image JSON into bytes
